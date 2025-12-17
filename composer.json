@@ -8,8 +8,15 @@
         "framework"
     ],
     "license": "MIT",
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/searsandrew/stellar-skirmish.git"
+        }
+    ],
     "require": {
         "php": "^8.2",
+        "jamrfun/stellar-skirmish": "^0.2.1",
         "laravel/framework": "^12.0",
         "laravel/sanctum": "^4.2",
         "laravel/tinker": "^2.10.1"
