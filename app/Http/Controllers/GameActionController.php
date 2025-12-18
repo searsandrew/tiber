@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Game;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use StellarSkirmish\GameEngine;
@@ -11,10 +12,10 @@ class GameActionController extends Controller
     public function store(Request $request, Game $game): JsonResponse
     {
         $validated = $request->validate([
-            'player_id'     => ['required', 'exists:users,id'],
-            'type'          => ['required', 'string', 'in:play_card,play_mercenary'],
-            'card_value'    => ['required_if:type,play_card', 'integer', 'min:-5', 'max:15'],
-            'mercenary_id'  => ['required_if:type,play_mercenary', 'exists:mercenaries,id'],
+            'player_id'    => ['required', 'integer', 'min:1'],
+            'type'         => ['required', 'string', 'in:play_card,play_mercenary'],
+            'card_value'   => ['required_if:type,play_card', 'integer'],
+            'mercenary_id' => ['required_if:type,play_mercenary', 'string'],
         ]);
 
         $playerId = (int) $validated['player_id'];
