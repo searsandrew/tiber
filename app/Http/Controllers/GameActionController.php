@@ -11,6 +11,12 @@ class GameActionController extends Controller
 {
     public function store(StoreGameActionRequest $request, Game $game): JsonResponse
     {
+        if ($game->status !== 'active') {
+            return response()->json([
+                'message' => 'Game is not active.',
+            ], 409);
+        }
+
         $validated = $request->validated();
 
         $playerIndex = $game->playerIndexFor($request->user());

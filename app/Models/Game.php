@@ -23,6 +23,7 @@ class Game extends Model
         'player_count',
         'seed',
         'visibility',
+        'invite_code',
         'config',
         'state',
     ];
@@ -49,6 +50,11 @@ class Game extends Model
     public function addPlayer(User $user, int $index): void
     {
         $this->players()->attach($user->id, ['player_index' => $index]);
+    }
+
+    public function playersCount(): int
+    {
+        return $this->players()->count();
     }
 
     public function playerIndexFor(User $user): ?int

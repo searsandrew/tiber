@@ -21,10 +21,9 @@ it('creates a new game via the Api', function () {
         ->assertJson(fn (AssertableJson $json) =>
             $json
                 ->has('data.id')
-                ->where('data.status', 'active')
+                ->where('data.status', 'waiting')
                 ->where('data.player_count', 2)
-                ->has('data.state.player_count')
-                ->where('data.state.player_count', 2)
+                ->missing('data.state')
                 ->etc()
         );
 
@@ -33,13 +32,9 @@ it('creates a new game via the Api', function () {
     $game = Game::findOrFail($gameId);
 
     expect($game->creator->is($user))->toBeTrue();
-    expect($game->status)->toBe('active');
+    expect($game->status)->toBe('waiting');
     expect($game->player_count)->toBe(2);
-
-    $stateArray = $game->state;
-    $state = GameState::fromArray($stateArray);
-
-    expect($state->playerCount)->toBe(2);
+    // State is not initialized until start; API hides it while waiting.
 });
 
 it('allows a player to play a card via the actions endpoint', function () {
