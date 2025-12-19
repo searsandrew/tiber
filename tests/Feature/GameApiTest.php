@@ -57,13 +57,15 @@ it('allows a player to play a card via the actions endpoint', function () {
         'state'        => $state->toArray(),
     ]);
 
+    // Attach creator as participant player 1
+    $game->addPlayer($user, 1);
+
     // Player 1 should have card 7 in hand before we play it
     expect($state->hands[1])->toContain(7);
 
     $response = $this
         ->actingAs($user, 'sanctum')
         ->postJson("/api/games/{$game->id}/actions", [
-            'player_id'  => 1,
             'type'       => 'play_card',
             'card_value' => 7,
         ]);
@@ -104,10 +106,12 @@ it('rejects invalid moves with a 422 status', function () {
         'state'        => $state->toArray(),
     ]);
 
+    // Attach creator as participant player 1
+    $game->addPlayer($user, 1);
+
     // Player 1 definitely does not have card 67
     $this->actingAs($user, 'sanctum')
         ->postJson("/api/games/{$game->id}/actions", [
-            'player_id'  => 1,
             'type'       => 'play_card',
             'card_value' => 67,
         ])

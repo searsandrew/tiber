@@ -2,25 +2,25 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreGameActionRequest;
 use App\Models\Game;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use StellarSkirmish\GameEngine;
 
 class GameActionController extends Controller
 {
-    public function store(Request $request, Game $game): JsonResponse
+    public function store(StoreGameActionRequest $request, Game $game): JsonResponse
     {
-        $validated = $request->validate([
-            'player_id'    => ['required', 'integer', 'min:1'],
-            'type'         => ['required', 'string', 'in:play_card,play_mercenary'],
-            'card_value'   => ['required_if:type,play_card', 'integer'],
-            'mercenary_id' => ['required_if:type,play_mercenary', 'string'],
-        ]);
+        $validated = $request->validated();
 
-        $playerId = (int) $validated['player_id'];
+        $playerIndex = $game->playerIndexFor($request->user());
+        if ($playerIndex === null) {
+            return response()->json([
+                'message' => 'You are not a participant in this game.',
+            ], 403);
+        }
 
-        $engine = new GameEngine();
+        $engine = new GameEngine;
         $state = $game->toGameState();
 
         if ($state->gameOver) {
@@ -32,19 +32,19 @@ class GameActionController extends Controller
         try {
             switch ($validated['type']) {
                 case 'play_card':
-                    $cardValue  = (int) $validated['card_value'];
-                    $state      = $engine->playCard($state, $playerId, $cardValue);
+                    $cardValue = (int) $validated['card_value'];
+                    $state = $engine->playCard($state, $playerIndex, $cardValue);
                     break;
                 case 'play_mercenary':
                     $mercenaryId = $validated['mercenary_id'];
-                    $state       = $engine->playMercenary($state, $playerId, $mercenaryId);
+                    $state = $engine->playMercenary($state, $playerIndex, $mercenaryId);
                     break;
             }
         } catch (\Throwable $e) {
             // @todo: refactor to capture specific engine exceptions
             return response()->json([
-                'message'   => 'Invalid action.',
-                'error'     => $e->getMessage(),
+                'message' => 'Invalid action.',
+                'error' => $e->getMessage(),
             ], 422);
         }
 
@@ -52,11 +52,13 @@ class GameActionController extends Controller
 
         return response()->json([
             'data' => [
-                'id'        => $game->id,
-                'status'    => $game->status,
+                'id' => $game->id,
+                'status' => $game->status,
                 'player_count' => $game->player_count,
-                'seed'      => $game->seed,
-                'state'     => $state->toArray(),
+                'seed' => $game->seed,
+                'visibility' => $game->visibility,
+                'config' => $game->config,
+                'state' => $state->toArray(),
             ],
         ]);
     }

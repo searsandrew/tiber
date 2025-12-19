@@ -14,11 +14,13 @@ return new class extends Migration
         Schema::create('games', function (Blueprint $table) {
             $table->ulid('id')->primary();
             $table->foreignUlid('user_id')      // creator/owner
-                  ->constrained()
-                  ->cascadeOnDelete();
+                ->constrained()
+                ->cascadeOnDelete();
             $table->string('status')->default('active');
             $table->unsignedInteger('player_count')->default(2);
             $table->unsignedBigInteger('seed')->nullable();
+            $table->enum('visibility', ['public', 'friends', 'private'])->default('private');
+            $table->json('config')->nullable();
             $table->json('state');
             $table->timestamps();
         });
