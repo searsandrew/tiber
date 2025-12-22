@@ -8,7 +8,9 @@ class StartGameRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user() !== null;
+        $game = $this->route('game');
+
+        return $game && $this->user()->can('start', $game);
     }
 
     public function rules(): array

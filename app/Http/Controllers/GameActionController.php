@@ -5,26 +5,17 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreGameActionRequest;
 use App\Models\Game;
 use Illuminate\Http\JsonResponse;
+use StellarSkirmish\Exceptions\GameOver;
+use StellarSkirmish\Exceptions\InvalidMove;
 use StellarSkirmish\GameEngine;
 
 class GameActionController extends Controller
 {
     public function store(StoreGameActionRequest $request, Game $game): JsonResponse
     {
-        if ($game->status !== 'active') {
-            return response()->json([
-                'message' => 'Game is not active.',
-            ], 409);
-        }
-
         $validated = $request->validated();
 
         $playerIndex = $game->playerIndexFor($request->user());
-        if ($playerIndex === null) {
-            return response()->json([
-                'message' => 'You are not a participant in this game.',
-            ], 403);
-        }
 
         $engine = new GameEngine;
         $state = $game->toGameState();
@@ -46,12 +37,21 @@ class GameActionController extends Controller
                     $state = $engine->playMercenary($state, $playerIndex, $mercenaryId);
                     break;
             }
-        } catch (\Throwable $e) {
-            // @todo: refactor to capture specific engine exceptions
+        } catch (GameOver $e) {
             return response()->json([
-                'message' => 'Invalid action.',
+                'message' => 'The game is over.',
                 'error' => $e->getMessage(),
             ], 422);
+        } catch (InvalidMove $e) {
+            return response()->json([
+                'message' => 'That move is not valid.',
+                'error' => $e->getMessage(),
+            ], 422);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'message' => 'An unexpected error occurred.',
+                'error' => $e->getMessage(),
+            ], 500);
         }
 
         $game->updateFromGameState($state);

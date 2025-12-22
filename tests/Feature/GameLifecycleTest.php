@@ -50,7 +50,7 @@ it('allows joining a public waiting game and prevents joining when full', functi
     // Game now full; third user cannot join
     $this->actingAs($extra)
         ->postJson("/api/games/{$gameId}/join", [])
-        ->assertStatus(409);
+        ->assertForbidden();
 });
 
 it('requires invite_code to join a private waiting game', function () {
@@ -98,6 +98,11 @@ it('starts a game only when exactly two players have joined', function () {
     $this->actingAs($friend)
         ->postJson("/api/games/{$gameId}/join")
         ->assertOk();
+
+    // Only owner can start
+    $this->actingAs($friend)
+        ->postJson("/api/games/{$gameId}/start")
+        ->assertForbidden();
 
     // Start now works
     $started = $this->actingAs($owner)

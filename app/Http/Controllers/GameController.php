@@ -2,10 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StoreGameRequest;
 use App\Http\Requests\JoinGameRequest;
 use App\Http\Requests\StartGameRequest;
-use App\Models\User;
+use App\Http\Requests\StoreGameRequest;
 use App\Models\Game;
 use Illuminate\Http\JsonResponse;
 use StellarSkirmish\GameConfig;
@@ -93,7 +92,7 @@ class GameController extends Controller
         if (request()->boolean('mine')) {
             $query->where(function ($q) use ($user) {
                 $q->where('user_id', $user->id)
-                    ->orWhereHas('players', fn($p) => $p->where('users.id', $user->id));
+                    ->orWhereHas('players', fn ($p) => $p->where('users.id', $user->id));
             });
         }
 
@@ -129,20 +128,6 @@ class GameController extends Controller
     {
         $user = $request->user();
 
-        if ($game->status !== 'waiting') {
-            return response()->json(['message' => 'Game is not joinable.'], 409);
-        }
-
-        // Already joined
-        if ($game->playerIndexFor($user) !== null) {
-            return response()->json(['message' => 'You have already joined this game.']);
-        }
-
-        // Capacity: MVP two players
-        if ($game->playersCount() >= 2) {
-            return response()->json(['message' => 'Game is full.'], 409);
-        }
-
         if ($game->visibility === 'private') {
             $code = $request->validated()['invite_code'] ?? null;
             if ($code === null || ! hash_equals($game->invite_code ?? '', $code)) {
@@ -167,6 +152,8 @@ class GameController extends Controller
     {
         $user = request()->user();
 
+        $this->authorize('leave', $game);
+
         $index = $game->playerIndexFor($user);
         if ($index === null) {
             return response()->json(['message' => 'You are not in this game.'], 403);
@@ -179,6 +166,7 @@ class GameController extends Controller
             // If creator leaves and no other players remain, delete the game
             if ($game->creator->is($user) && $game->players()->count() === 0) {
                 $game->delete();
+
                 return response()->json(['data' => null]);
             }
 
@@ -210,10 +198,6 @@ class GameController extends Controller
 
     public function start(StartGameRequest $request, Game $game): JsonResponse
     {
-        if ($game->status !== 'waiting') {
-            return response()->json(['message' => 'Game already started.'], 409);
-        }
-
         if ($game->playersCount() !== 2) {
             return response()->json(['message' => 'Exactly two players are required to start.'], 422);
         }
