@@ -1,59 +1,95 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+### Stellar Skirmish API Documentation
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Here is a list of all current API endpoints and a guide on how to use them to run a game from start to finish.
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+### 1. Authentication Endpoints
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+These endpoints handle user identification and security.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+*   **`POST /api/login`**
+    *   **Purpose:** Authenticate and receive a Sanctum API token.
+    *   **Payload:** `{ "email": "user@example.com", "password": "password" }`
+    *   **Response:** `{ "token": "..." }`
+    *   **Usage:** Use the returned token in the `Authorization: Bearer {token}` header for all subsequent requests.
 
-## Learning Laravel
+*   **`GET /api/user`** (Protected)
+    *   **Purpose:** Fetch the currently authenticated user's profile.
+    *   **Response:** User object (id, name, email, etc.).
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+---
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### 2. Game Lifecycle Endpoints (Protected)
 
-## Laravel Sponsors
+These endpoints manage the creation, joining, and starting of games.
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+*   **`GET /api/games`**
+    *   **Purpose:** List games.
+    *   **Query Params:**
+        *   `mine=1`: Shows games you created or joined.
+        *   `joinable=1`: Shows public games waiting for players.
+    *   **Response:** A list of game objects.
 
-### Premium Partners
+*   **`POST /api/games`**
+    *   **Purpose:** Create a new game lobby.
+    *   **Payload:**
+        *   `visibility`: "public" or "private" (default: "private").
+        *   `player_count`: 2 (default).
+        *   `seed`: Optional integer for deterministic gameplay.
+    *   **Response:** The created game object. For private games, an `invite_code` is returned.
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+*   **`GET /api/games/{game}`**
+    *   **Purpose:** Retrieve the current state of a specific game.
+    *   **Behavior:** The `state` object is hidden until the game is `active`.
 
-## Contributing
+*   **`POST /api/games/{game}/join`**
+    *   **Purpose:** Join a waiting game.
+    *   **Payload:** `{ "invite_code": "ABCDEF" }` (Required if the game is private).
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+*   **`POST /api/games/{game}/leave`**
+    *   **Purpose:** Leave a waiting game or resign from an active game.
 
-## Code of Conduct
+*   **`POST /api/games/{game}/start`**
+    *   **Purpose:** Transition a game from `waiting` to `active`.
+    *   **Rule:** Only the game creator can call this, and exactly 2 players must be in the game.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+---
 
-## Security Vulnerabilities
+### 3. Gameplay Endpoints (Protected)
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+*   **`POST /api/games/{game}/actions`**
+    *   **Purpose:** Play a card or a mercenary.
+    *   **Payload (Play Card):** `{ "type": "play_card", "card_value": 7 }`
+    *   **Payload (Play Mercenary):** `{ "type": "play_mercenary", "mercenary_id": "..." }`
+    *   **Response:** The updated game state.
 
-## License
+---
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+### How to Make a Game Happen: Step-by-Step
+
+To run a complete game session, follow these steps:
+
+1.  **Authentication:**
+    *   Both Player A and Player B log in via `POST /api/login` to get their tokens.
+
+2.  **Creation (Player A):**
+    *   Player A calls `POST /api/games` with `visibility: "public"`.
+    *   Player A receives the `game_id`. At this point, the game status is `waiting`.
+
+3.  **Joining (Player B):**
+    *   Player B finds the game via `GET /api/games?joinable=1` or by receiving the ID/Code from Player A.
+    *   Player B calls `POST /api/games/{game_id}/join`.
+
+4.  **Starting (Player A):**
+    *   Once both are in, Player A calls `POST /api/games/{game_id}/start`.
+    *   The status changes to `active`, and the initial `state` (hands, deck, planets) is generated and returned.
+
+5.  **Playing (Turns):**
+    *   Players inspect the `state` via `GET /api/games/{game_id}`.
+    *   Players submit moves via `POST /api/games/{game_id}/actions`.
+    *   The engine automatically resolves battles once both players have played their cards for a round.
+
+6.  **Completion:**
+    *   The game continues until the engine determines a winner.
+    *   The status changes to `completed`, and the final `state` reflects the end-of-game results.
