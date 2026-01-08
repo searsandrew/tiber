@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\GameActionController;
 use App\Http\Controllers\GameController;
+use App\Http\Controllers\PlanetController;
 use App\Http\Requests\Auth\RegisterRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -57,6 +58,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::middleware('abilities:games:read')->group(function () {
         Route::get('/games', [GameController::class, 'index']);
         Route::get('/games/{game}', [GameController::class, 'show']);
+        Route::get('/planets', [PlanetController::class, 'index']);
     });
 
     Route::middleware('abilities:games:write')->group(function () {

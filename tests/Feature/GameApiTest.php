@@ -8,7 +8,6 @@ use Illuminate\Testing\Fluent\AssertableJson;
 use Laravel\Sanctum\Sanctum;
 use StellarSkirmish\GameConfig;
 use StellarSkirmish\GameEngine;
-use StellarSkirmish\GameState;
 
 it('creates a new game via the Api', function () {
     $user = User::factory()->create();
@@ -19,8 +18,7 @@ it('creates a new game via the Api', function () {
 
     $response
         ->assertCreated()
-        ->assertJson(fn (AssertableJson $json) =>
-        $json
+        ->assertJson(fn (AssertableJson $json) => $json
             ->has('data.id')
             ->where('data.status', 'waiting')
             ->where('data.player_count', 2)
@@ -42,16 +40,16 @@ it('allows a player to play a card via the actions endpoint', function () {
 
     Sanctum::actingAs($user, ['games:write']);
 
-    $engine = new GameEngine();
+    $engine = new GameEngine;
     $config = GameConfig::standardTwoPlayer(seed: 123);
-    $state  = $engine->startNewGame($config);
+    $state = $engine->startNewGame($config);
 
     $game = Game::create([
-        'user_id'      => $user->id,
-        'status'       => 'active',
+        'user_id' => $user->id,
+        'status' => 'active',
         'player_count' => 2,
-        'seed'         => 123,
-        'state'        => $state->toArray(),
+        'seed' => 123,
+        'state' => $state->toArray(),
     ]);
 
     $game->addPlayer($user, 1);
@@ -59,14 +57,13 @@ it('allows a player to play a card via the actions endpoint', function () {
     expect($state->hands[1])->toContain(7);
 
     $response = $this->postJson("/api/games/{$game->id}/actions", [
-        'type'       => 'play_card',
+        'type' => 'play_card',
         'card_value' => 7,
     ]);
 
     $response
         ->assertOk()
-        ->assertJson(fn (AssertableJson $json) =>
-        $json
+        ->assertJson(fn (AssertableJson $json) => $json
             ->has('data.id')
             ->where('data.id', $game->id)
             ->has('data.state.hands.1')
@@ -85,29 +82,31 @@ it('rejects invalid moves with a 422 status', function () {
 
     Sanctum::actingAs($user, ['games:write']);
 
-    $engine = new GameEngine();
+    $engine = new GameEngine;
     $config = GameConfig::standardTwoPlayer();
-    $state  = $engine->startNewGame($config);
+    $state = $engine->startNewGame($config);
 
     $game = Game::create([
-        'user_id'      => $user->id,
-        'status'       => 'active',
+        'user_id' => $user->id,
+        'status' => 'active',
         'player_count' => 2,
-        'seed'         => null,
-        'state'        => $state->toArray(),
+        'seed' => null,
+        'state' => $state->toArray(),
     ]);
 
     $game->addPlayer($user, 1);
 
     $this->postJson("/api/games/{$game->id}/actions", [
-        'type'       => 'play_card',
+        'type' => 'play_card',
         'card_value' => 67,
     ])
         ->assertStatus(422)
-        ->assertJson(fn (AssertableJson $json) =>
-        $json
+        ->assertJson(fn (AssertableJson $json) => $json
             ->has('message')
             ->has('error')
         );
 });
 
+it('requires authentication to list games', function () {
+    $this->getJson('/api/games')->assertUnauthorized();
+});
