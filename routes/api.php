@@ -23,7 +23,7 @@ Route::post('/register', function (RegisterRequest $request) {
             'games:write',
         ])->plainTextToken,
     ], 201);
-});
+})->middleware(\App\Http\Middleware\LogRegistrationAttempt::class);
 
 Route::post('/login', function (Request $request) {
     $request->validate([

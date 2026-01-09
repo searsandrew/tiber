@@ -2,8 +2,11 @@
 
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 
 it('can register a new user', function () {
+    Log::spy();
+
     $response = $this->postJson('/api/register', [
         'name' => 'Test User',
         'email' => 'test@example.com',
@@ -24,6 +27,15 @@ it('can register a new user', function () {
 
     $user = User::where('email', 'test@example.com')->first();
     expect(Hash::check('password', $user->password))->toBeTrue();
+
+    Log::shouldHaveReceived('info')
+        ->once()
+        ->with(Mockery::on(function ($message) {
+            return str_contains($message, 'Registration attempt') &&
+                   str_contains($message, 'Test User') &&
+                   str_contains($message, 'test@example.com') &&
+                   ! str_contains($message, 'password');
+        }));
 });
 
 it('can login an existing user', function () {
@@ -43,8 +55,17 @@ it('can login an existing user', function () {
 });
 
 it('validates registration input', function () {
+    Log::spy();
+
     $response = $this->postJson('/api/register', []);
 
     $response->assertStatus(422);
     $response->assertJsonValidationErrors(['name', 'email', 'password']);
+
+    Log::shouldHaveReceived('info')
+        ->once()
+        ->with(Mockery::on(function ($message) {
+            return str_contains($message, 'Registration attempt') &&
+                   str_contains($message, 'Status: 422');
+        }));
 });
