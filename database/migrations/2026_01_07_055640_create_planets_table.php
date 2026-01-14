@@ -15,10 +15,12 @@ return new class extends Migration
             $table->ulid('id')->primary();
             $table->string('name');
             $table->text('flavor');
-            $table->string('type');
+            $table->string('type')->nullable();
+            $table->string('class')->nullable();
             $table->integer('victory_point_value');
             $table->string('filename');
             $table->boolean('is_standard')->default(false);
+            $table->boolean('is_promotional')->default(false);
             $table->boolean('is_purchasable')->default(false);
             $table->boolean('is_custom')->default(false);
             $table->timestamps();

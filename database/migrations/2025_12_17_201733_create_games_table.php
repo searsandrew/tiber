@@ -20,6 +20,8 @@ return new class extends Migration
             $table->unsignedInteger('player_count')->default(2);
             $table->unsignedBigInteger('seed')->nullable();
             $table->enum('visibility', ['public', 'friends', 'private'])->default('private');
+            $table->string('invite_code', 16)->nullable();
+            $table->index('invite_code');
             $table->json('config')->nullable();
             $table->json('state');
             $table->timestamps();

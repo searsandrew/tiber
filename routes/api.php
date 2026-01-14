@@ -4,6 +4,7 @@ use App\Http\Controllers\GameActionController;
 use App\Http\Controllers\GameController;
 use App\Http\Controllers\PlanetController;
 use App\Http\Requests\Auth\RegisterRequest;
+use App\Models\Planet;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -17,11 +18,18 @@ Route::post('/register', function (RegisterRequest $request) {
         'password' => Hash::make($request->password),
     ]);
 
+    $token = $user->createToken('api-token', [
+        'games:read',
+        'games:write',
+    ]);
+
     return response()->json([
-        'token' => $user->createToken('api-token', [
-            'games:read',
-            'games:write',
-        ])->plainTextToken,
+        'token' => $token->plainTextToken,
+        'user' => [
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+        ],
     ], 201);
 })->middleware(\App\Http\Middleware\LogRegistrationAttempt::class);
 
@@ -39,12 +47,19 @@ Route::post('/login', function (Request $request) {
         ]);
     }
 
+    $token = $user->createToken('api-token', [
+                'games:read',
+                'games:write',
+            ]);
+
     return response()->json([
-        'token' => $user->createToken('api-token', [
-            'games:read',
-            'games:write',
-        ])->plainTextToken,
-    ]);
+        'token' => $token->plainTextToken,
+        'user' => [
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+        ],
+    ], 201);
 })->middleware('throttle:login');
 
 Route::middleware('auth:sanctum')->group(function () {
@@ -68,4 +83,15 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/games/{game}/actions', [GameActionController::class, 'store']);
         Route::post('/games/{game}/start', [GameController::class, 'start'])->middleware('can:start,game'); // also write
     });
+});
+
+Route::get('/catalog/planets', function () {
+    $planets = Planet::query()->get();
+
+    return response()->json([
+        'data' => $planets,
+        'meta' => [
+            'last_updated_at' => optional($planets->max('updated_at'))?->toISOString(),
+        ],
+    ]);
 });
