@@ -20,7 +20,7 @@ class PlanetSeeder extends Seeder
                 'type' => null,
                 'class' => 'trade_post_colony',
                 'victory_point_value' => 1,
-                'filename' => 'levo.png',
+                'filename' => 'skirmish/levo.png',
                 'is_standard' => true,
             ], [
                 'name' => 'Lethe Prime',
@@ -28,7 +28,7 @@ class PlanetSeeder extends Seeder
                 'type' => null,
                 'class' => 'research_colony',
                 'victory_point_value' => 1,
-                'filename' => 'lethe-prime.png',
+                'filename' => 'skirmish/lethe-prime.png',
                 'is_standard' => true,
             ], [
                 'name' => 'New Cydonia',
@@ -36,7 +36,7 @@ class PlanetSeeder extends Seeder
                 'type' => null,
                 'class' => 'mining_colony',
                 'victory_point_value' => 1,
-                'filename' => 'new-cydonia.png',
+                'filename' => 'skirmish/new-cydonia.png',
                 'is_standard' => true,
             ], [
                 'name' => 'Uppskeruenda',
@@ -44,7 +44,7 @@ class PlanetSeeder extends Seeder
                 'type' => null,
                 'class' => 'trade_post_colony',
                 'victory_point_value' => 1,
-                'filename' => 'uppskeruenda.png',
+                'filename' => 'skirmish/uppskeruenda.png',
                 'is_standard' => true,
             ], [
                 'name' => 'Scrandy',
@@ -52,7 +52,7 @@ class PlanetSeeder extends Seeder
                 'type' => null,
                 'class' => 'research_colony',
                 'victory_point_value' => 1,
-                'filename' => 'scrandy.png',
+                'filename' => 'skirmish/scrandy.png',
                 'is_standard' => true,
             ], [
                 'name' => 'Infernus',
@@ -60,7 +60,7 @@ class PlanetSeeder extends Seeder
                 'type' => null,
                 'class' => 'mining_colony',
                 'victory_point_value' => 1,
-                'filename' => 'infernus.png',
+                'filename' => 'skirmish/infernus.png',
                 'is_standard' => true,
             ], [
                 'name' => 'Vanta',
@@ -68,7 +68,7 @@ class PlanetSeeder extends Seeder
                 'type' => null,
                 'class' => 'trade_post_colony',
                 'victory_point_value' => 2,
-                'filename' => 'vanta.png',
+                'filename' => 'skirmish/vanta.png',
                 'is_standard' => true,
             ], [
                 'name' => 'Teslaron',
@@ -76,7 +76,7 @@ class PlanetSeeder extends Seeder
                 'type' => null,
                 'class' => 'research_colony',
                 'victory_point_value' => 2,
-                'filename' => 'teslaron.png',
+                'filename' => 'skirmish/teslaron.png',
                 'is_standard' => true,
             ], [
                 'name' => 'Khatri',
@@ -84,7 +84,7 @@ class PlanetSeeder extends Seeder
                 'type' => null,
                 'class' => 'mining_colony',
                 'victory_point_value' => 2,
-                'filename' => 'khatri.png',
+                'filename' => 'skirmish/khatri.png',
                 'is_standard' => true,
             ], [
                 'name' => 'Tallon 7',
@@ -92,7 +92,7 @@ class PlanetSeeder extends Seeder
                 'type' => null,
                 'class' => 'trade_post_colony',
                 'victory_point_value' => 2,
-                'filename' => 'tallon-7.png',
+                'filename' => 'skirmish/tallon-7.png',
                 'is_standard' => true,
             ], [
                 'name' => 'Raiu',
@@ -100,7 +100,7 @@ class PlanetSeeder extends Seeder
                 'type' => null,
                 'class' => 'research_colony',
                 'victory_point_value' => 2,
-                'filename' => 'raiu.png',
+                'filename' => 'skirmish/raiu.png',
                 'is_standard' => true,
             ], [
                 'name' => 'Lyyrah',
@@ -108,7 +108,7 @@ class PlanetSeeder extends Seeder
                 'type' => null,
                 'class' => 'mining_colony',
                 'victory_point_value' => 2,
-                'filename' => 'lyyrah.png',
+                'filename' => 'skirmish/lyyrah.png',
                 'is_standard' => true,
             ], [
                 'name' => 'Nu\'rexia',
@@ -116,7 +116,7 @@ class PlanetSeeder extends Seeder
                 'type' => null,
                 'class' => 'trade_post_colony',
                 'victory_point_value' => 3,
-                'filename' => 'nu-rexia.png',
+                'filename' => 'skirmish/nu-rexia.png',
                 'is_standard' => true,
             ], [
                 'name' => 'Auea Prime',
@@ -124,7 +124,7 @@ class PlanetSeeder extends Seeder
                 'type' => null,
                 'class' => 'research_colony',
                 'victory_point_value' => 3,
-                'filename' => 'auea-prime.png',
+                'filename' => 'skirmish/auea-prime.png',
                 'is_standard' => true,
             ], [
                 'name' => 'Asher A',
@@ -132,7 +132,7 @@ class PlanetSeeder extends Seeder
                 'type' => null,
                 'class' => 'mining_colony',
                 'victory_point_value' => 3,
-                'filename' => 'asher-a.png',
+                'filename' => 'skirmish/asher-a.png',
                 'is_standard' => true,
             ]
         ];
